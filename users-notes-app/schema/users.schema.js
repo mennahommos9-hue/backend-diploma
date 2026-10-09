@@ -17,6 +17,9 @@ const userShema = new EntitySchema({
       type: "varchar",
       unique: true,
     },
+    password: {
+      type: "varchar",
+    },
   },
   relations: {
     notes: {

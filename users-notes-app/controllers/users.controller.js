@@ -4,18 +4,6 @@ const asyncHandler = require("../utils/asyncHandler");
 
 const userRepository = AppDataSource.getRepository("user");
 
-const addUser = asyncHandler(async (req, res) => {
-  const { username, email } = req.body;
-
-  const newUser = userRepository.create({ username, email });
-  const savedUser = await userRepository.save(newUser);
-
-  res.status(201).json({
-    message: "user added successfully",
-    data: savedUser,
-  });
-});
-
 const getAllUsers = asyncHandler(async (req, res) => {
   const users = await userRepository.find();
 
@@ -60,6 +48,12 @@ const deleteUser = asyncHandler(async (req, res) => {
     });
   }
 
+  if (user.id !== req.user.id) {
+    return res.status(401).json({
+      message: "You don't have access to delete this user",
+    });
+  }
+
   await userRepository.delete(user);
 
   res.status(200).json({
@@ -76,6 +70,12 @@ const updateUser = asyncHandler(async (req, res) => {
   if (!user) {
     return res.status(404).json({
       message: "user not found",
+    });
+  }
+
+  if (user.id !== req.user.id) {
+    return res.status(401).json({
+      message: "You don't have access to update this user",
     });
   }
 
@@ -109,7 +109,6 @@ const searchUser = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  addUser,
   getAllUsers,
   getUserById,
   updateUser,

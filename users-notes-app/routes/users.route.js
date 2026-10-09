@@ -1,18 +1,21 @@
 const express = require("express");
 const {
-  addUser,
   getAllUsers,
   getUserById,
   updateUser,
   deleteUser,
   searchUser,
 } = require("../controllers/users.controller");
+const protect = require("../middlewares/protect.middleware");
 
 const router = express.Router();
 
-router.get("/search", searchUser);
-router.post("/", addUser);
-router.get("/", getAllUsers);
-router.route("/:id").get(getUserById).patch(updateUser).delete(deleteUser);
+router.get("/search", protect, searchUser);
+router.get("/", protect, getAllUsers);
+router
+  .route("/:id")
+  .get(protect, getUserById)
+  .patch(protect, updateUser)
+  .delete(protect, deleteUser);
 
 module.exports = router;
