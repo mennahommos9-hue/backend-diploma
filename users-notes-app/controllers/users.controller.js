@@ -1,6 +1,7 @@
 const AppDataSource = require("../database/db");
 const { ILike } = require("typeorm");
 const asyncHandler = require("../utils/asyncHandler");
+const AppError = require("../utils/AppError");
 
 const userRepository = AppDataSource.getRepository("user");
 
@@ -29,9 +30,7 @@ const getUserById = asyncHandler(async (req, res, next) => {
   });
 
   if (!user) {
-    return res.status(404).json({
-      message: "user not found",
-    });
+    return next(new AppError("user not found", 404));
   }
 
   res.status(200).json({
@@ -60,9 +59,7 @@ const deleteUser = asyncHandler(async (req, res, next) => {
   });
 
   if (!user) {
-    return res.status(404).json({
-      message: "user not found",
-    });
+    return next(new AppError("user not found", 404));
   }
 
   await userRepository.delete(user);
@@ -100,9 +97,7 @@ const searchUser = asyncHandler(async (req, res, next) => {
   });
 
   if (users.length === 0) {
-    return res.status(404).json({
-      message: "not found",
-    });
+    return next(new AppError("not found", 404));
   }
 
   res.status(200).json({

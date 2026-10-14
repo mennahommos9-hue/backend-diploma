@@ -1,6 +1,7 @@
 const { ILike } = require("typeorm");
 const AppDataSource = require("../database/db");
 const asyncHandler = require("../utils/asyncHandler");
+const AppError = require("../utils/AppError");
 
 const noteRepository = AppDataSource.getRepository("note");
 const userRepository = AppDataSource.getRepository("user");
@@ -40,9 +41,7 @@ const getUserNotes = asyncHandler(async (req, res, next) => {
   const user = await userRepository.findOneBy({ id: userId });
 
   if (!user) {
-    return res.status(404).json({
-      message: "user not found",
-    });
+    return next(new AppError("user not found", 404));
   }
 
   const userNotes = await noteRepository.find({
@@ -60,9 +59,7 @@ const getMyNotes = asyncHandler(async (req, res, next) => {
 
   const myNotes = await noteRepository.find({ where: { user: { id: id } } });
   if (myNotes.length === 0) {
-    return res.status(404).json({
-      message: "You don't have any notes",
-    });
+    return next(new AppError("you don't have any notes", 404));
   }
 
   res.status(200).json({
@@ -82,15 +79,11 @@ const deleteNote = asyncHandler(async (req, res) => {
   });
 
   if (!note) {
-    return res.status(404).json({
-      message: "note not found",
-    });
+    return next(new AppError("note note found", 404));
   }
 
   if (note.user.id !== req.user.id && req.user.role !== "admin") {
-    return res.status(401).json({
-      message: "You don't have access to delete this note",
-    });
+    return next(new AppError("You don't have access to delete this note", 403));
   }
 
   await noteRepository.delete(note);
@@ -111,15 +104,11 @@ const updateNote = asyncHandler(async (req, res, next) => {
   });
 
   if (!note) {
-    return res.status(404).json({
-      message: "note not found",
-    });
+    return next(new AppError("note note found", 404));
   }
 
   if (note.user.id !== req.user.id && req.user.role !== "admin") {
-    return res.status(401).json({
-      message: "You don't have access to update this note",
-    });
+    return next(new AppError("You don't have access to update this note", 403));
   }
 
   await noteRepository.update(id, req.body);
@@ -139,9 +128,7 @@ const searchNote = asyncHandler(async (req, res, next) => {
   });
 
   if (notes.length === 0) {
-    return res.status(404).json({
-      message: "not found",
-    });
+    return next(new AppError("not found", 404));
   }
 
   res.status(200).json({
