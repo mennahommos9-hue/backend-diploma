@@ -1,8 +1,8 @@
 require("dotenv").config();
 const { DataSource } = require("typeorm");
 
-const Note = require("../schema/notes.schema");
-const User = require("../schema/users.schema");
+const Note = require("../models/notes.schema");
+const User = require("../models/users.schema");
 
 const AppDataSource = new DataSource({
   type: process.env.DB_TYPE,

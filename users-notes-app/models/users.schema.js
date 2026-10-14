@@ -1,0 +1,39 @@
+const { EntitySchema } = require("typeorm");
+
+const userShema = new EntitySchema({
+  name: "user",
+  tableName: "users",
+  columns: {
+    id: {
+      primary: true,
+      type: "int",
+      generated: true,
+    },
+    username: {
+      type: "varchar",
+      unique: true,
+    },
+    email: {
+      type: "varchar",
+      unique: true,
+    },
+    password: {
+      type: "varchar",
+    },
+    role: {
+      type: "enum",
+      enum: ["user", "admin"],
+      default: "user",
+    },
+  },
+  relations: {
+    notes: {
+      target: "note",
+      type: "one-to-many",
+      inverseSide: "user",
+      cascade: true,
+    },
+  },
+});
+
+module.exports = userShema;

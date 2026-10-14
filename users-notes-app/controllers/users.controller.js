@@ -4,8 +4,10 @@ const asyncHandler = require("../utils/asyncHandler");
 
 const userRepository = AppDataSource.getRepository("user");
 
-const getAllUsers = asyncHandler(async (req, res) => {
-  const users = await userRepository.find();
+const getAllUsers = asyncHandler(async (req, res, next) => {
+  const users = await userRepository.find({
+    select: { id: true, username: true, email: true },
+  });
 
   res.status(200).json({
     message: "success",
@@ -13,13 +15,14 @@ const getAllUsers = asyncHandler(async (req, res) => {
   });
 });
 
-const getUserById = asyncHandler(async (req, res) => {
+const getUserById = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
   const user = await userRepository.findOne({
     where: {
       id: id,
     },
+    select: { id: true, username: true, email: true },
     relations: {
       notes: true,
     },
@@ -37,20 +40,28 @@ const getUserById = asyncHandler(async (req, res) => {
   });
 });
 
-const deleteUser = asyncHandler(async (req, res) => {
+const getMe = asyncHandler(async (req, res, next) => {
+  const me = req.user;
+
+  res.status(200).json({
+    message: "success",
+    data: { id: me.id, username: me.username, email: me.email },
+  });
+});
+
+const deleteUser = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
-  const user = await userRepository.findOneBy({ id: id });
+  const user = await userRepository.findOne({
+    where: {
+      id: id,
+    },
+    select: { id: true, username: true, email: true },
+  });
 
   if (!user) {
     return res.status(404).json({
       message: "user not found",
-    });
-  }
-
-  if (user.id !== req.user.id) {
-    return res.status(401).json({
-      message: "You don't have access to delete this user",
     });
   }
 
@@ -62,38 +73,30 @@ const deleteUser = asyncHandler(async (req, res) => {
   });
 });
 
-const updateUser = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+const updateMe = asyncHandler(async (req, res, next) => {
+  const me = req.user;
 
-  const user = await userRepository.findOneBy({ id: id });
+  await userRepository.update(me, req.body);
 
-  if (!user) {
-    return res.status(404).json({
-      message: "user not found",
-    });
-  }
-
-  if (user.id !== req.user.id) {
-    return res.status(401).json({
-      message: "You don't have access to update this user",
-    });
-  }
-
-  await userRepository.update(id, req.body);
-
-  const updatedUser = await userRepository.findOneBy({ id: id });
+  const updatedMe = await userRepository.findOne({
+    where: {
+      id: me.id,
+    },
+    select: { id: true, username: true, email: true },
+  });
 
   res.status(200).json({
     message: "user updated successfully",
-    data: updatedUser,
+    data: updatedMe,
   });
 });
 
-const searchUser = asyncHandler(async (req, res) => {
+const searchUser = asyncHandler(async (req, res, next) => {
   const { name } = req.query;
 
   const users = await userRepository.find({
     where: { username: ILike(`%${name}%`) },
+    select: { id: true, username: true, email: true },
   });
 
   if (users.length === 0) {
@@ -111,7 +114,8 @@ const searchUser = asyncHandler(async (req, res) => {
 module.exports = {
   getAllUsers,
   getUserById,
-  updateUser,
+  getMe,
+  updateMe,
   deleteUser,
   searchUser,
 };

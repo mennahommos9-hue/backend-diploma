@@ -58,8 +58,8 @@ const getUserNotes = asyncHandler(async (req, res, next) => {
 const getMyNotes = asyncHandler(async (req, res, next) => {
   const { id } = req.user;
 
-  const myNotes = noteRepository.find({ where: { user: { id: id } } });
-  if (!myNotes) {
+  const myNotes = await noteRepository.find({ where: { user: { id: id } } });
+  if (myNotes.length === 0) {
     return res.status(404).json({
       message: "You don't have any notes",
     });
@@ -87,7 +87,7 @@ const deleteNote = asyncHandler(async (req, res) => {
     });
   }
 
-  if (note.user.id !== req.user.id) {
+  if (note.user.id !== req.user.id && req.user.role !== "admin") {
     return res.status(401).json({
       message: "You don't have access to delete this note",
     });
@@ -116,7 +116,7 @@ const updateNote = asyncHandler(async (req, res, next) => {
     });
   }
 
-  if (note.user.id !== req.user.id) {
+  if (note.user.id !== req.user.id && req.user.role !== "admin") {
     return res.status(401).json({
       message: "You don't have access to update this note",
     });

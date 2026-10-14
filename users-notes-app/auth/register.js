@@ -5,15 +5,7 @@ const bcrypt = require("bcrypt");
 const userRepository = AppDataSource.getRepository("user");
 
 const register = asyncHandler(async (req, res) => {
-  const { username, email, password } = req.body;
-
-  const user = await userRepository.findOne({ where: { email: email } });
-
-  if (user) {
-    return res.status(400).json({
-      message: "user already exist",
-    });
-  }
+  const { username, email, password, role } = req.body;
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -21,6 +13,7 @@ const register = asyncHandler(async (req, res) => {
     username,
     email,
     password: hashedPassword,
+    role
   });
   const savedUser = await userRepository.save(newUser);
 
