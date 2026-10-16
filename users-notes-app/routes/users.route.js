@@ -8,7 +8,7 @@ const {
   searchUser,
 } = require("../controllers/users.controller");
 const validate = require("../middlewares/validation.middleware");
-const { updateSchema } = require("../validation/user.validation");
+const { updateSchema } = require("../validators/user.validation");
 const protect = require("../middlewares/protect.middleware");
 const restrictedTo = require("../middlewares/authorization.middleware");
 

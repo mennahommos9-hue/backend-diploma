@@ -1,5 +1,5 @@
 require("dotenv").config();
-const AppDataSource = require("./database/db");
+const AppDataSource = require("./config/db");
 const app = require("./app")
 
 AppDataSource.initialize()

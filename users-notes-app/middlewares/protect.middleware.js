@@ -1,4 +1,4 @@
-const AppDataSource = require("../database/db");
+const AppDataSource = require("../config/db");
 const asyncHandler = require("../utils/asyncHandler");
 const jwt = require("jsonwebtoken");
 const AppError = require("../utils/AppError");

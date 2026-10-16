@@ -6,7 +6,7 @@ const validate = require("../middlewares/validation.middleware");
 const {
   loginSchema,
   registerSchema,
-} = require("../validation/user.validation");
+} = require("../validators/user.validation");
 
 const router = express.Router();
 

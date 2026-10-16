@@ -12,7 +12,7 @@ const validate = require("../middlewares/validation.middleware");
 const {
   addNoteSchema,
   updateNoteSchema,
-} = require("../validation/note.validation");
+} = require("../validators/note.validation");
 const protect = require("../middlewares/protect.middleware");
 
 const router = express.Router();

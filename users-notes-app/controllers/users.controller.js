@@ -1,14 +1,10 @@
-const AppDataSource = require("../database/db");
-const { ILike } = require("typeorm");
 const asyncHandler = require("../utils/asyncHandler");
-const AppError = require("../utils/AppError");
+const UserServices = require("../services/user.services");
 
-const userRepository = AppDataSource.getRepository("user");
+const userServices = new UserServices();
 
 const getAllUsers = asyncHandler(async (req, res, next) => {
-  const users = await userRepository.find({
-    select: { id: true, username: true, email: true },
-  });
+  await userServices.getAllUsers();
 
   res.status(200).json({
     message: "success",
@@ -19,19 +15,7 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
 const getUserById = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
-  const user = await userRepository.findOne({
-    where: {
-      id: id,
-    },
-    select: { id: true, username: true, email: true },
-    relations: {
-      notes: true,
-    },
-  });
-
-  if (!user) {
-    return next(new AppError("user not found", 404));
-  }
+  const user = await userServices.getUserById(id);
 
   res.status(200).json({
     message: "success",
@@ -51,54 +35,33 @@ const getMe = asyncHandler(async (req, res, next) => {
 const deleteUser = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
-  const user = await userRepository.findOne({
-    where: {
-      id: id,
-    },
-    select: { id: true, username: true, email: true },
-  });
-
-  if (!user) {
-    return next(new AppError("user not found", 404));
-  }
-
-  await userRepository.delete(user);
+  const deletedUser = await userServices.deleteUser(id);
 
   res.status(200).json({
     message: "user deleted successfully",
-    data: user,
+    data: deletedUser,
   });
 });
 
 const updateMe = asyncHandler(async (req, res, next) => {
-  const me = req.user;
+  const me = req.user.id;
 
-  await userRepository.update(me, req.body);
-
-  const updatedMe = await userRepository.findOne({
-    where: {
-      id: me.id,
-    },
-    select: { id: true, username: true, email: true },
-  });
+  const updatedMe = await userServices.updateMe(me, req.body);
 
   res.status(200).json({
     message: "user updated successfully",
-    data: updatedMe,
+    data: {
+      id: updatedMe.id,
+      username: updatedMe.username,
+      email: updatedMe.email,
+    },
   });
 });
 
 const searchUser = asyncHandler(async (req, res, next) => {
   const { name } = req.query;
 
-  const users = await userRepository.find({
-    where: { username: ILike(`%${name}%`) },
-    select: { id: true, username: true, email: true },
-  });
-
-  if (users.length === 0) {
-    return next(new AppError("not found", 404));
-  }
+  const users = await userServices.searchUsers(name);
 
   res.status(200).json({
     message: "success",
